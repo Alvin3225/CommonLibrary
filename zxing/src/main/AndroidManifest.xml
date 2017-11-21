@@ -19,7 +19,8 @@
                 android:resource="@xml/provider_paths"/>
         </provider>
         <activity android:name=".CaptureActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/NoTitleWhite"/>
     </application>
 
 </manifest>
