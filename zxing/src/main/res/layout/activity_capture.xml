@@ -26,7 +26,8 @@
         <RelativeLayout
             android:id="@+id/ll_top"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@android:color/black">
 
             <LinearLayout
                 android:id="@+id/top_leftLy"
