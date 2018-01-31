@@ -48,13 +48,11 @@ final class DecodeHandler extends Handler {
 	private final MultiFormatReader multiFormatReader;
 
 	private boolean running = true;
-	private boolean autoEnlarged = false;//是否具有自动放大功能(功能仅仅限扫描的是二维码，条形码不放大)
 
-	DecodeHandler(CaptureActivity activity, Map<DecodeHintType, Object> hints,boolean autoEnlarged) {
+	DecodeHandler(CaptureActivity activity, Map<DecodeHintType, Object> hints) {
 		multiFormatReader = new MultiFormatReader();
-		multiFormatReader.setHints(hints);
+		multiFormatReader.setHints(hints,activity);
 		this.activity = activity;
-		this.autoEnlarged = autoEnlarged;
 	}
 
 	@Override
@@ -124,56 +122,13 @@ final class DecodeHandler extends Handler {
 			long end = System.currentTimeMillis();
 			Log.d(TAG, "Found barcode in " + (end - start) + " ms");
 			if (handler != null) {
-				if (rawResult.getBarcodeFormat() == BarcodeFormat.QR_CODE && autoEnlarged) {
+				if (rawResult.getBarcodeFormat() == BarcodeFormat.QR_CODE) {
 					Log.e("ssssss", "是二维码");
-					//计算扫描框中的二维码的宽度，两点间距离公式
-					float point1X = rawResult.getResultPoints()[0].getX();
-					float point1Y = rawResult.getResultPoints()[0].getY();
-					float point2X = rawResult.getResultPoints()[1].getX();
-					float point2Y = rawResult.getResultPoints()[1].getY();
-					int len =(int) Math.sqrt(Math.abs(point1X-point2X)*Math.abs(point1X-point2X)+Math.abs(point1Y-point2Y)*Math.abs(point1Y-point2Y));
-					Rect frameRect = activity.getCameraManager().getFramingRect();
-					if(frameRect!=null){
-						int frameWidth = frameRect.right-frameRect.left;
-						Camera camera = activity.getCameraManager().getCamera();
-						Camera.Parameters parameters = camera.getParameters();
-						int maxZoom = parameters.getMaxZoom();
-						int zoom = parameters.getZoom();
-						if(parameters.isZoomSupported()){//支持放大镜头
-							if(len <= frameWidth/4){//二维码在扫描框中的宽度小于扫描框的1/4，放大镜头
-								if(zoom==0){
-									zoom = maxZoom/2;
-								}else if(zoom <= maxZoom-10){
-									zoom = zoom+10;
-								}else{
-									zoom = maxZoom;
-								}
-								parameters.setZoom(zoom);
-								camera.setParameters(parameters);
-								//重新扫描
-								Message message = Message.obtain(handler, R.id.decode_failed);
-								message.sendToTarget();
-							}else{
-								Message message = Message.obtain(handler, R.id.decode_succeeded, rawResult);
-								Bundle bundle = new Bundle();
-								bundleThumbnail(source, bundle);
-								message.setData(bundle);
-								message.sendToTarget();
-							}
-						}else{
-							Message message = Message.obtain(handler, R.id.decode_succeeded, rawResult);
-							Bundle bundle = new Bundle();
-							bundleThumbnail(source, bundle);
-							message.setData(bundle);
-							message.sendToTarget();
-						}
-					}else{
-						Message message = Message.obtain(handler, R.id.decode_succeeded, rawResult);
-						Bundle bundle = new Bundle();
-						bundleThumbnail(source, bundle);
-						message.setData(bundle);
-						message.sendToTarget();
-					}
+					Message message = Message.obtain(handler, R.id.decode_succeeded, rawResult);
+					Bundle bundle = new Bundle();
+					bundleThumbnail(source, bundle);
+					message.setData(bundle);
+					message.sendToTarget();
 				}else{
 					Message message = Message.obtain(handler, R.id.decode_succeeded, rawResult);
 					Bundle bundle = new Bundle();

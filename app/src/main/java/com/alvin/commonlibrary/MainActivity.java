@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
     public void sweep(View view) {
         Intent intent = new Intent();
         intent.setClass(this, CaptureActivity.class);
+        intent.putExtra("autoEnlarged",true);
         startActivityForResult(intent,0);
     }
 

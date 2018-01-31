@@ -3,6 +3,7 @@ package com.common.zxing.decode;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.common.zxing.CaptureActivity;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -24,7 +25,7 @@ public class BitmapDecoder {
 
 	MultiFormatReader multiFormatReader;
 
-	public BitmapDecoder(Context context) {
+	public BitmapDecoder(CaptureActivity activity) {
 
 		multiFormatReader = new MultiFormatReader();
 
@@ -47,7 +48,7 @@ public class BitmapDecoder {
 		hints.put(DecodeHintType.CHARACTER_SET, "UTF8");
 
 		// 设置解析配置参数
-		multiFormatReader.setHints(hints);
+		multiFormatReader.setHints(hints,activity);
 
 	}
 

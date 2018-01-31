@@ -451,7 +451,7 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
             // RuntimeException.
             if (handler == null) {
                 handler = new CaptureActivityHandler(this, decodeFormats,
-                        decodeHints, characterSet, cameraManager,autoEnlarged);
+                        decodeHints, characterSet, cameraManager);
             }
             decodeOrStoreSavedBitmap(null, null);
         } catch (IOException ioe) {
@@ -521,5 +521,9 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
         } else {
         }
 
+    }
+
+    public boolean isAutoEnlarged() {
+        return autoEnlarged;
     }
 }

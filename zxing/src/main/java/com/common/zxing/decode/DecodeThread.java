@@ -53,15 +53,12 @@ final class DecodeThread extends Thread {
 
 	private final CountDownLatch handlerInitLatch;
 
-	private boolean autoEnlarged;//自动放大
-
 	DecodeThread(CaptureActivity activity,
                  Collection<BarcodeFormat> decodeFormats,
                  Map<DecodeHintType, ?> baseHints, String characterSet,
-                 ResultPointCallback resultPointCallback,boolean autoEnlarged) {
+                 ResultPointCallback resultPointCallback) {
 
 		this.activity = activity;
-		this.autoEnlarged = autoEnlarged;
 		handlerInitLatch = new CountDownLatch(1);
 
 		hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
@@ -109,7 +106,7 @@ final class DecodeThread extends Thread {
 	@Override
 	public void run() {
 		Looper.prepare();
-		handler = new DecodeHandler(activity, hints,autoEnlarged);
+		handler = new DecodeHandler(activity, hints);
 		handlerInitLatch.countDown();
 		Looper.loop();
 	}
