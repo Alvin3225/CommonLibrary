@@ -53,7 +53,7 @@ public final class MultiFormatReader implements Reader {
    */
   @Override
   public Result decode(BinaryBitmap image) throws NotFoundException {
-    setHints(null,activity);
+    setHints(null);
     return decodeInternal(image);
   }
 
@@ -67,7 +67,7 @@ public final class MultiFormatReader implements Reader {
    */
   @Override
   public Result decode(BinaryBitmap image, Map<DecodeHintType,?> hints) throws NotFoundException {
-    setHints(hints,activity);
+    setHints(hints);
     return decodeInternal(image);
   }
 
@@ -82,7 +82,7 @@ public final class MultiFormatReader implements Reader {
   public Result decodeWithState(BinaryBitmap image) throws NotFoundException {
     // Make sure to set up the default state so we don't crash
     if (readers == null) {
-      setHints(null,activity);
+      setHints(null);
     }
     return decodeInternal(image);
   }
@@ -94,7 +94,7 @@ public final class MultiFormatReader implements Reader {
    *
    * @param hints The set of hints to use for subsequent calls to decode(image)
    */
-  public void setHints(Map<DecodeHintType,?> hints,CaptureActivity activity) {
+  public void setHints(Map<DecodeHintType,?> hints) {
     this.hints = hints;
 
     boolean tryHarder = hints != null && hints.containsKey(DecodeHintType.TRY_HARDER);
@@ -179,4 +179,7 @@ public final class MultiFormatReader implements Reader {
     throw NotFoundException.getNotFoundInstance();
   }
 
+  public void setActivity(CaptureActivity activity) {
+    this.activity = activity;
+  }
 }

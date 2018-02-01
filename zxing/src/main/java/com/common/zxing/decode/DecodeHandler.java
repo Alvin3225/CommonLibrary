@@ -51,7 +51,8 @@ final class DecodeHandler extends Handler {
 
 	DecodeHandler(CaptureActivity activity, Map<DecodeHintType, Object> hints) {
 		multiFormatReader = new MultiFormatReader();
-		multiFormatReader.setHints(hints,activity);
+		multiFormatReader.setActivity(activity);
+		multiFormatReader.setHints(hints);
 		this.activity = activity;
 	}
 

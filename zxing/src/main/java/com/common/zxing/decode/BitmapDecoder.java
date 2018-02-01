@@ -25,7 +25,7 @@ public class BitmapDecoder {
 
 	MultiFormatReader multiFormatReader;
 
-	public BitmapDecoder(CaptureActivity activity) {
+	public BitmapDecoder(Context context) {
 
 		multiFormatReader = new MultiFormatReader();
 
@@ -48,7 +48,7 @@ public class BitmapDecoder {
 		hints.put(DecodeHintType.CHARACTER_SET, "UTF8");
 
 		// 设置解析配置参数
-		multiFormatReader.setHints(hints,activity);
+		multiFormatReader.setHints(hints);
 
 	}
 
