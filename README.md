@@ -39,5 +39,5 @@ startActivityForResult(intent,0);
     }
 
 ```
-![image](http://note.youdao.com/groupshare/?token=7A9EAA6F99AD4406A8D14129C760A5A0&gid=8127320)
+![觉得可以的话，随便赞赏一下吧，鼓励一下](https://github.com/Alvin9234/CustomViewLoadImage/blob/master/res/drawable-xhdpi/appraise.png?raw=true)
 有关二维码放大的问题，大家可以移步我的博客，有说明。http://blog.csdn.net/u010705554/article/details/78204090
