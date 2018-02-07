@@ -43,5 +43,6 @@ startActivityForResult(intent,0);
 
 
 
+觉得可以的话，随便赞赏一下吧，鼓励一下^_^
 
 ![觉得可以的话，随便赞赏一下吧，鼓励一下](https://github.com/Alvin9234/CustomViewLoadImage/blob/master/assets/appraise.png?raw=true)
