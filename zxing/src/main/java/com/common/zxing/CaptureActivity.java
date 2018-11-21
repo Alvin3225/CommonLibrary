@@ -366,12 +366,11 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        hasSurface = false;
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-
+        hasSurface = false;
     }
 
     /**
