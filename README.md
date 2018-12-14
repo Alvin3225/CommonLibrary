@@ -9,7 +9,7 @@ common libraries
 
 添加依赖
 ```Java
-compile 'com.github.Alvin9234:CommonLibrary:1.0.6'
+compile 'com.github.Alvin9234:CommonLibrary:1.0.7'
 
 项目根目录的gradle添加
 allprojects {
