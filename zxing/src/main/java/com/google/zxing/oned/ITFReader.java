@@ -45,13 +45,14 @@ import java.util.Map;
 public final class ITFReader extends OneDReader {
 
   private static final float MAX_AVG_VARIANCE = 0.38f;
-  private static final float MAX_INDIVIDUAL_VARIANCE = 0.78f;
+  private static final float MAX_INDIVIDUAL_VARIANCE = 0.5f;
 
-  private static final int W = 3; // Pixel width of a wide line
+  private static final int W = 3; // Pixel width of a 3x wide line
+  private static final int w = 2; // Pixel width of a 2x wide line
   private static final int N = 1; // Pixed width of a narrow line
 
   /** Valid ITF lengths. Anything longer than the largest value is also allowed. */
-  private static final int[] DEFAULT_ALLOWED_LENGTHS = { 6, 8, 10, 12, 14 };
+  private static final int[] DEFAULT_ALLOWED_LENGTHS = {6, 8, 10, 12, 14};
 
   // Stores the actual narrow line width of the image being decoded.
   private int narrowLineWidth = -1;
@@ -63,12 +64,27 @@ public final class ITFReader extends OneDReader {
    * searching for the END_PATTERN
    */
   private static final int[] START_PATTERN = {N, N, N, N};
-  private static final int[] END_PATTERN_REVERSED = {N, N, W};
+  private static final int[][] END_PATTERN_REVERSED = {
+      {N, N, w}, // 2x
+      {N, N, W}  // 3x
+  };
+
+  // See ITFWriter.PATTERNS
 
   /**
    * Patterns of Wide / Narrow lines to indicate each digit
    */
-  static final int[][] PATTERNS = {
+  private static final int[][] PATTERNS = {
+      {N, N, w, w, N}, // 0
+      {w, N, N, N, w}, // 1
+      {N, w, N, N, w}, // 2
+      {w, w, N, N, N}, // 3
+      {N, N, w, N, w}, // 4
+      {w, N, w, N, N}, // 5
+      {N, w, w, N, N}, // 6
+      {N, N, N, w, w}, // 7
+      {w, N, N, w, N}, // 8
+      {N, w, N, w, N}, // 9
       {N, N, W, W, N}, // 0
       {W, N, N, N, W}, // 1
       {N, W, N, N, W}, // 2
@@ -126,8 +142,8 @@ public final class ITFReader extends OneDReader {
     return new Result(
         resultString,
         null, // no natural byte representation for these barcodes
-        new ResultPoint[] { new ResultPoint(startRange[1], rowNumber),
-                            new ResultPoint(endRange[0], rowNumber)},
+        new ResultPoint[] {new ResultPoint(startRange[1], rowNumber),
+                           new ResultPoint(endRange[0], rowNumber)},
         BarcodeFormat.ITF);
   }
 
@@ -259,7 +275,12 @@ public final class ITFReader extends OneDReader {
     row.reverse();
     try {
       int endStart = skipWhiteSpace(row);
-      int[] endPattern = findGuardPattern(row, endStart, END_PATTERN_REVERSED);
+      int[] endPattern;
+      try {
+        endPattern = findGuardPattern(row, endStart, END_PATTERN_REVERSED[0]);
+      } catch (NotFoundException nfe) {
+        endPattern = findGuardPattern(row, endStart, END_PATTERN_REVERSED[1]);
+      }
 
       // The start & end patterns must be pre/post fixed by a quiet zone. This
       // zone must be at least 10 times the width of a narrow line.
@@ -300,7 +321,7 @@ public final class ITFReader extends OneDReader {
     int counterPosition = 0;
     int patternStart = rowOffset;
     for (int x = rowOffset; x < width; x++) {
-      if (row.get(x) ^ isWhite) {
+      if (row.get(x) != isWhite) {
         counters[counterPosition]++;
       } else {
         if (counterPosition == patternLength - 1) {
@@ -308,9 +329,9 @@ public final class ITFReader extends OneDReader {
             return new int[]{patternStart, x};
           }
           patternStart += counters[0] + counters[1];
-          System.arraycopy(counters, 2, counters, 0, patternLength - 2);
-          counters[patternLength - 2] = 0;
-          counters[patternLength - 1] = 0;
+          System.arraycopy(counters, 2, counters, 0, counterPosition - 1);
+          counters[counterPosition - 1] = 0;
+          counters[counterPosition] = 0;
           counterPosition--;
         } else {
           counterPosition++;
@@ -340,10 +361,13 @@ public final class ITFReader extends OneDReader {
       if (variance < bestVariance) {
         bestVariance = variance;
         bestMatch = i;
+      } else if (variance == bestVariance) {
+        // if we find a second 'best match' with the same variance, we can not reliably report to have a suitable match
+        bestMatch = -1;
       }
     }
     if (bestMatch >= 0) {
-      return bestMatch;
+      return bestMatch % 10;
     } else {
       throw NotFoundException.getNotFoundInstance();
     }

@@ -16,11 +16,6 @@
 
 package com.google.zxing.qrcode;
 
-import android.graphics.Rect;
-import android.hardware.Camera;
-
-import com.common.zxing.CaptureActivity;
-import com.common.zxing.camera.CameraManager;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
@@ -56,12 +51,6 @@ public class QRCodeReader implements Reader {
     return decoder;
   }
 
-  private CaptureActivity activity;
-
-  public QRCodeReader(CaptureActivity activity) {
-    this.activity = activity;
-  }
-
   /**
    * Locates and decodes a QR code in an image.
    *
@@ -85,42 +74,7 @@ public class QRCodeReader implements Reader {
       decoderResult = decoder.decode(bits, hints);
       points = NO_POINTS;
     } else {
-      //1、将图像进行二值化处理，1、0代表黑、白。( 二维码的使用getBlackMatrix方法 )
-      //2、寻找定位符、校正符，然后将原图像中符号码部分取出。（detector代码实现的功能）
       DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);
-      if(activity!=null && activity.isAutoEnlarged()){
-        CameraManager cameraManager = activity.getCameraManager();
-        ResultPoint[] p = detectorResult.getPoints();
-        //计算扫描框中的二维码的宽度，两点间距离公式
-        float point1X = p[0].getX();
-        float point1Y = p[0].getY();
-        float point2X = p[1].getX();
-        float point2Y = p[1].getY();
-        int len =(int) Math.sqrt(Math.abs(point1X-point2X)*Math.abs(point1X-point2X)+Math.abs(point1Y-point2Y)*Math.abs(point1Y-point2Y));
-        Rect frameRect = cameraManager.getFramingRect();
-        if(frameRect!=null){
-          int frameWidth = frameRect.right-frameRect.left;
-          Camera camera = cameraManager.getCamera();
-          Camera.Parameters parameters = camera.getParameters();
-          int maxZoom = parameters.getMaxZoom();
-          int zoom = parameters.getZoom();
-          if(parameters.isZoomSupported()){
-            if(len <= frameWidth/4) {//二维码在扫描框中的宽度小于扫描框的1/4，放大镜头
-              if (zoom == 0) {
-                zoom = maxZoom / 2;
-              } else if (zoom <= maxZoom - 10) {
-                zoom = zoom + 10;
-              } else {
-                zoom = maxZoom;
-              }
-              parameters.setZoom(zoom);
-              camera.setParameters(parameters);
-              return null;
-            }
-          }
-        }
-      }
-      //3、对符号码矩阵按照编码规范进行解码，得到实际信息（decoder代码实现的功能）
       decoderResult = decoder.decode(detectorResult.getBits(), hints);
       points = detectorResult.getPoints();
     }
@@ -175,7 +129,7 @@ public class QRCodeReader implements Reader {
     int bottom = rightBottomBlack[1];
     int left = leftTopBlack[0];
     int right = rightBottomBlack[0];
-    
+
     // Sanity check!
     if (left >= right || top >= bottom) {
       throw NotFoundException.getNotFoundInstance();
@@ -207,7 +161,7 @@ public class QRCodeReader implements Reader {
     int nudge = (int) (moduleSize / 2.0f);
     top += nudge;
     left += nudge;
-    
+
     // But careful that this does not sample off the edge
     // "right" is the farthest-right valid pixel location -- right+1 is not necessarily
     // This is positive by how much the inner x loop below would be too large

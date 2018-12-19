@@ -1,5 +1,6 @@
 package com.alvin.commonlibrary;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +8,9 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.common.zxing.CaptureActivity;
+
+import pub.devrel.easypermissions.EasyPermissions;
+import pub.devrel.easypermissions.PermissionRequest;
 
 public class MainActivity extends Activity {
 
@@ -20,10 +24,14 @@ public class MainActivity extends Activity {
     }
 
     public void sweep(View view) {
-        Intent intent = new Intent();
-        intent.setClass(this, CaptureActivity.class);
-        intent.putExtra("autoEnlarged",true);
-        startActivityForResult(intent,0);
+        if(EasyPermissions.hasPermissions(this,Manifest.permission.CAMERA)){
+            Intent intent = new Intent();
+            intent.setClass(this, CaptureActivity.class);
+            intent.putExtra("autoEnlarged",true);
+            startActivityForResult(intent,0);
+        }else{
+            EasyPermissions.requestPermissions(new PermissionRequest.Builder(this,1,Manifest.permission.CAMERA).build());
+        }
     }
 
     @Override
@@ -32,5 +40,13 @@ public class MainActivity extends Activity {
             String result = data.getStringExtra("result");
             tv_result.setText(result);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 }

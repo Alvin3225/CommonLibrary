@@ -90,8 +90,7 @@ public final class WhiteRectangleDetector {
     int down = downInit;
     boolean sizeExceeded = false;
     boolean aBlackPointFoundOnBorder = true;
-    boolean atLeastOneBlackPointFoundOnBorder = false;
-    
+
     boolean atLeastOneBlackPointFoundOnRight = false;
     boolean atLeastOneBlackPointFoundOnBottom = false;
     boolean atLeastOneBlackPointFoundOnLeft = false;
@@ -165,7 +164,7 @@ public final class WhiteRectangleDetector {
       // .   .
       // .....
       boolean topBorderNotWhite = true;
-      while ((topBorderNotWhite  || !atLeastOneBlackPointFoundOnTop) && up >= 0) {
+      while ((topBorderNotWhite || !atLeastOneBlackPointFoundOnTop) && up >= 0) {
         topBorderNotWhite = containsBlackPoint(left, right, up, true);
         if (topBorderNotWhite) {
           up--;
@@ -181,13 +180,9 @@ public final class WhiteRectangleDetector {
         break;
       }
 
-      if (aBlackPointFoundOnBorder) {
-        atLeastOneBlackPointFoundOnBorder = true;
-      }
-
     }
 
-    if (!sizeExceeded && atLeastOneBlackPointFoundOnBorder) {
+    if (!sizeExceeded) {
 
       int maxSize = right - left;
 

@@ -26,6 +26,7 @@ import com.google.zxing.common.CharacterSetECI;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -98,13 +99,13 @@ final class PDF417HighLevelEncoder {
    * identifier for a user defined Extended Channel Interpretation (ECI)
    */
   private static final int ECI_USER_DEFINED = 925;
-  
+
   /**
    * identifier for a general purpose ECO format
    */
   private static final int ECI_GENERAL_PURPOSE = 926;
-  
-  /** 
+
+  /**
    * identifier for an ECI of a character set of code page
    */
   private static final int ECI_CHARSET = 927;
@@ -126,7 +127,7 @@ final class PDF417HighLevelEncoder {
   private static final byte[] MIXED = new byte[128];
   private static final byte[] PUNCTUATION = new byte[128];
 
-  private static final Charset DEFAULT_ENCODING = Charset.forName("ISO-8859-1");
+  private static final Charset DEFAULT_ENCODING = StandardCharsets.ISO_8859_1;
 
   private PDF417HighLevelEncoder() {
   }
@@ -179,56 +180,58 @@ final class PDF417HighLevelEncoder {
     int textSubMode = SUBMODE_ALPHA;
 
     // User selected encoding mode
-    if (compaction == Compaction.TEXT) {
-      encodeText(msg, p, len, sb, textSubMode);
-
-    } else if (compaction == Compaction.BYTE) {
-      byte[] bytes = msg.getBytes(encoding);
-      encodeBinary(bytes, p, bytes.length, BYTE_COMPACTION, sb);
-
-    } else if (compaction == Compaction.NUMERIC) {
-      sb.append((char) LATCH_TO_NUMERIC);
-      encodeNumeric(msg, p, len, sb);
-
-    } else {
-      int encodingMode = TEXT_COMPACTION; //Default mode, see 4.4.2.1
-      while (p < len) {
-        int n = determineConsecutiveDigitCount(msg, p);
-        if (n >= 13) {
-          sb.append((char) LATCH_TO_NUMERIC);
-          encodingMode = NUMERIC_COMPACTION;
-          textSubMode = SUBMODE_ALPHA; //Reset after latch
-          encodeNumeric(msg, p, n, sb);
-          p += n;
-        } else {
-          int t = determineConsecutiveTextCount(msg, p);
-          if (t >= 5 || n == len) {
-            if (encodingMode != TEXT_COMPACTION) {
-              sb.append((char) LATCH_TO_TEXT);
-              encodingMode = TEXT_COMPACTION;
-              textSubMode = SUBMODE_ALPHA; //start with submode alpha after latch
-            }
-            textSubMode = encodeText(msg, p, t, sb, textSubMode);
-            p += t;
+    switch (compaction) {
+      case TEXT:
+        encodeText(msg, p, len, sb, textSubMode);
+        break;
+      case BYTE:
+        byte[] msgBytes = msg.getBytes(encoding);
+        encodeBinary(msgBytes, p, msgBytes.length, BYTE_COMPACTION, sb);
+        break;
+      case NUMERIC:
+        sb.append((char) LATCH_TO_NUMERIC);
+        encodeNumeric(msg, p, len, sb);
+        break;
+      default:
+        int encodingMode = TEXT_COMPACTION; //Default mode, see 4.4.2.1
+        while (p < len) {
+          int n = determineConsecutiveDigitCount(msg, p);
+          if (n >= 13) {
+            sb.append((char) LATCH_TO_NUMERIC);
+            encodingMode = NUMERIC_COMPACTION;
+            textSubMode = SUBMODE_ALPHA; //Reset after latch
+            encodeNumeric(msg, p, n, sb);
+            p += n;
           } else {
-            int b = determineConsecutiveBinaryCount(msg, p, encoding);
-            if (b == 0) {
-              b = 1;
-            }
-            byte[] bytes = msg.substring(p, p + b).getBytes(encoding);
-            if (bytes.length == 1 && encodingMode == TEXT_COMPACTION) {
-              //Switch for one byte (instead of latch)
-              encodeBinary(bytes, 0, 1, TEXT_COMPACTION, sb);
+            int t = determineConsecutiveTextCount(msg, p);
+            if (t >= 5 || n == len) {
+              if (encodingMode != TEXT_COMPACTION) {
+                sb.append((char) LATCH_TO_TEXT);
+                encodingMode = TEXT_COMPACTION;
+                textSubMode = SUBMODE_ALPHA; //start with submode alpha after latch
+              }
+              textSubMode = encodeText(msg, p, t, sb, textSubMode);
+              p += t;
             } else {
-              //Mode latch performed by encodeBinary()
-              encodeBinary(bytes, 0, bytes.length, encodingMode, sb);
-              encodingMode = BYTE_COMPACTION;
-              textSubMode = SUBMODE_ALPHA; //Reset after latch
+              int b = determineConsecutiveBinaryCount(msg, p, encoding);
+              if (b == 0) {
+                b = 1;
+              }
+              byte[] bytes = msg.substring(p, p + b).getBytes(encoding);
+              if (bytes.length == 1 && encodingMode == TEXT_COMPACTION) {
+                //Switch for one byte (instead of latch)
+                encodeBinary(bytes, 0, 1, TEXT_COMPACTION, sb);
+              } else {
+                //Mode latch performed by encodeBinary()
+                encodeBinary(bytes, 0, bytes.length, encodingMode, sb);
+                encodingMode = BYTE_COMPACTION;
+                textSubMode = SUBMODE_ALPHA; //Reset after latch
+              }
+              p += b;
             }
-            p += b;
           }
         }
-      }
+        break;
     }
 
     return sb.toString();

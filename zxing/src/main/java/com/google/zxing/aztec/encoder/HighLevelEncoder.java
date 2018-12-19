@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * This produces nearly optimal encodings of text into the first-level of
@@ -163,19 +162,19 @@ public final class HighLevelEncoder {
       int pairCode;
       int nextChar = index + 1 < text.length ? text[index + 1] : 0;
       switch (text[index]) {
-        case '\r':  
-          pairCode = nextChar == '\n' ? 2 : 0; 
+        case '\r':
+          pairCode = nextChar == '\n' ? 2 : 0;
           break;
-        case '.' :  
-          pairCode = nextChar == ' '  ? 3 : 0; 
+        case '.' :
+          pairCode = nextChar == ' ' ? 3 : 0;
           break;
-        case ',' :  
-          pairCode = nextChar == ' ' ? 4 : 0; 
+        case ',' :
+          pairCode = nextChar == ' ' ? 4 : 0;
           break;
-        case ':' :  
-          pairCode = nextChar == ' ' ? 5 : 0; 
+        case ':' :
+          pairCode = nextChar == ' ' ? 5 : 0;
           break;
-        default:    
+        default:
           pairCode = 0;
       }
       if (pairCode > 0) {
@@ -284,7 +283,7 @@ public final class HighLevelEncoder {
   }
 
   private static Collection<State> simplifyStates(Iterable<State> states) {
-    List<State> result = new LinkedList<>();
+    Collection<State> result = new LinkedList<>();
     for (State newState : states) {
       boolean add = true;
       for (Iterator<State> iterator = result.iterator(); iterator.hasNext();) {

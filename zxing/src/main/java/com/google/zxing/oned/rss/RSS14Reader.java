@@ -75,10 +75,8 @@ public final class RSS14Reader extends AbstractRSSReader {
     for (Pair left : possibleLeftPairs) {
       if (left.getCount() > 1) {
         for (Pair right : possibleRightPairs) {
-          if (right.getCount() > 1) {
-            if (checkChecksum(left, right)) {
-              return constructResult(left, right);
-            }
+          if (right.getCount() > 1 && checkChecksum(left, right)) {
+            return constructResult(left, right);
           }
         }
       }
@@ -133,7 +131,7 @@ public final class RSS14Reader extends AbstractRSSReader {
     ResultPoint[] leftPoints = leftPair.getFinderPattern().getResultPoints();
     ResultPoint[] rightPoints = rightPair.getFinderPattern().getResultPoints();
     return new Result(
-        String.valueOf(buffer.toString()),
+        buffer.toString(),
         null,
         new ResultPoint[] { leftPoints[0], leftPoints[1], rightPoints[0], rightPoints[1], },
         BarcodeFormat.RSS_14);
@@ -159,7 +157,7 @@ public final class RSS14Reader extends AbstractRSSReader {
 
   private Pair decodePair(BitArray row, boolean right, int rowNumber, Map<DecodeHintType,?> hints) {
     try {
-      int[] startEnd = findFinderPattern(row, 0, right);
+      int[] startEnd = findFinderPattern(row, right);
       FinderPattern pattern = parseFoundFinderPattern(row, rowNumber, right, startEnd);
 
       ResultPointCallback resultPointCallback = hints == null ? null :
@@ -188,14 +186,9 @@ public final class RSS14Reader extends AbstractRSSReader {
       throws NotFoundException {
 
     int[] counters = getDataCharacterCounters();
-    counters[0] = 0;
-    counters[1] = 0;
-    counters[2] = 0;
-    counters[3] = 0;
-    counters[4] = 0;
-    counters[5] = 0;
-    counters[6] = 0;
-    counters[7] = 0;
+    for (int x = 0; x < counters.length; x++) {
+      counters[x] = 0;
+    }
 
     if (outsideChar) {
       recordPatternInReverse(row, pattern.getStartEnd()[0], counters);
@@ -281,7 +274,7 @@ public final class RSS14Reader extends AbstractRSSReader {
 
   }
 
-  private int[] findFinderPattern(BitArray row, int rowOffset, boolean rightFinderPattern)
+  private int[] findFinderPattern(BitArray row, boolean rightFinderPattern)
       throws NotFoundException {
 
     int[] counters = getDecodeFinderCounters();
@@ -292,6 +285,7 @@ public final class RSS14Reader extends AbstractRSSReader {
 
     int width = row.getSize();
     boolean isWhite = false;
+    int rowOffset = 0;
     while (rowOffset < width) {
       isWhite = !row.get(rowOffset);
       if (rightFinderPattern == isWhite) {
@@ -304,7 +298,7 @@ public final class RSS14Reader extends AbstractRSSReader {
     int counterPosition = 0;
     int patternStart = rowOffset;
     for (int x = rowOffset; x < width; x++) {
-      if (row.get(x) ^ isWhite) {
+      if (row.get(x) != isWhite) {
         counters[counterPosition]++;
       } else {
         if (counterPosition == 3) {
@@ -334,7 +328,7 @@ public final class RSS14Reader extends AbstractRSSReader {
     boolean firstIsBlack = row.get(startEnd[0]);
     int firstElementStart = startEnd[0] - 1;
     // Locate element 1
-    while (firstElementStart >= 0 && firstIsBlack ^ row.get(firstElementStart)) {
+    while (firstElementStart >= 0 && firstIsBlack != row.get(firstElementStart)) {
       firstElementStart--;
     }
     firstElementStart++;

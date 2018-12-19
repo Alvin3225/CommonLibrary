@@ -38,7 +38,7 @@ import java.util.Collection;
  * This view is overlaid on top of the camera preview. It adds the viewfinder
  * rectangle and partial transparency outside it, as well as the laser scanner
  * animation and result points.
- * 
+ *
  * @author dswitkin@google.com (Daniel Switkin)
  */
 public final class ViewfinderView extends View {
@@ -215,8 +215,7 @@ public final class ViewfinderView extends View {
 			lineRect.right = frame.right;
 			lineRect.top = slideTop;
 			lineRect.bottom = slideTop + 18;
-			canvas.drawBitmap(((BitmapDrawable) (getResources().getDrawable(R.drawable.scan_laser))).getBitmap(),
-					null, lineRect, paint);
+			canvas.drawBitmap(((BitmapDrawable) (getResources().getDrawable(R.drawable.scan_laser))).getBitmap(), null, lineRect, paint);
 
 			/** 不显示关键点
 			Collection<ResultPoint> currentPossible = possibleResultPoints;
@@ -243,7 +242,7 @@ public final class ViewfinderView extends View {
 			// 只刷新扫描框的内容，其他地方不刷新
 			postInvalidateDelayed(ANIMATION_DELAY, frame.left, frame.top, frame.right, frame.bottom);
 
-			
+
 			paint = new Paint();
 
 			//画扫描框下面的字
@@ -252,10 +251,10 @@ public final class ViewfinderView extends View {
 			paint.setTextAlign(Align.CENTER);
 			canvas.drawText(getResources().getString(R.string.bottom_hint), width / 2, frame.bottom + (float)TEXT_PADDING_TOP *density, paint);
 			canvas.drawText(getResources().getString(R.string.bottom_hint2), width / 2, (float) (frame.bottom + (float)TEXT_PADDING_TOP *density*1.5), paint);
-			
+
 		}
 	}
-	
+
 	@Override
 	protected void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
@@ -273,7 +272,7 @@ public final class ViewfinderView extends View {
 	/**
 	 * Draw a bitmap with the result points highlighted instead of the live
 	 * scanning display.
-	 * 
+	 *
 	 * @param barcode
 	 *            An image of the decoded barcode.
 	 */

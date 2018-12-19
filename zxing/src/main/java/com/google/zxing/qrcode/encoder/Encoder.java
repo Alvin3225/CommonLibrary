@@ -78,7 +78,8 @@ public final class Encoder {
 
     // Determine what character encoding has been specified by the caller, if any
     String encoding = DEFAULT_BYTE_MODE_ENCODING;
-    if (hints != null && hints.containsKey(EncodeHintType.CHARACTER_SET)) {
+    boolean hasEncodingHint = hints != null && hints.containsKey(EncodeHintType.CHARACTER_SET);
+    if (hasEncodingHint) {
       encoding = hints.get(EncodeHintType.CHARACTER_SET).toString();
     }
 
@@ -91,11 +92,18 @@ public final class Encoder {
     BitArray headerBits = new BitArray();
 
     // Append ECI segment if applicable
-    if (mode == Mode.BYTE && !DEFAULT_BYTE_MODE_ENCODING.equals(encoding)) {
+    if (mode == Mode.BYTE && hasEncodingHint) {
       CharacterSetECI eci = CharacterSetECI.getCharacterSetECIByName(encoding);
       if (eci != null) {
         appendECI(eci, headerBits);
       }
+    }
+
+    // Append the FNC1 mode header for GS1 formatted data if applicable
+    boolean hasGS1FormatHint = hints != null && hints.containsKey(EncodeHintType.GS1_FORMAT);
+    if (hasGS1FormatHint && Boolean.valueOf(hints.get(EncodeHintType.GS1_FORMAT).toString())) {
+      // GS1 formatted codes are prefixed with a FNC1 in first position mode header
+      appendModeInfo(Mode.FNC1_FIRST_POSITION, headerBits);
     }
 
     // (With ECI in place,) Write the mode marker
@@ -581,8 +589,11 @@ public final class Encoder {
     } catch (UnsupportedEncodingException uee) {
       throw new WriterException(uee);
     }
-    int length = bytes.length;
-    for (int i = 0; i < length; i += 2) {
+    if (bytes.length % 2 != 0) {
+      throw new WriterException("Kanji byte size not even");
+    }
+    int maxI = bytes.length - 1; // bytes.length must be even
+    for (int i = 0; i < maxI; i += 2) {
       int byte1 = bytes[i] & 0xFF;
       int byte2 = bytes[i + 1] & 0xFF;
       int code = (byte1 << 8) | byte2;

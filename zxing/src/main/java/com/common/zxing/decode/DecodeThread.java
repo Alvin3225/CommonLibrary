@@ -16,17 +16,16 @@
 
 package com.common.zxing.decode;
 
+import com.common.zxing.CaptureActivity;
+import com.common.zxing.PreferencesActivity;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.DecodeHintType;
+import com.google.zxing.ResultPointCallback;
+
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.util.Log;
-
-import com.common.zxing.config.Config;
-import com.common.zxing.CaptureActivity;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.ResultPointCallback;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -36,79 +35,79 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * This thread does all the heavy lifting of decoding the images.
- * 
+ *
  * @author dswitkin@google.com (Daniel Switkin)
  */
 final class DecodeThread extends Thread {
 
-	public static final String BARCODE_BITMAP = "barcode_bitmap";
+  public static final String BARCODE_BITMAP = "barcode_bitmap";
+  public static final String BARCODE_SCALED_FACTOR = "barcode_scaled_factor";
 
-	public static final String BARCODE_SCALED_FACTOR = "barcode_scaled_factor";
+  private final CaptureActivity activity;
+  private final Map<DecodeHintType,Object> hints;
+  private Handler handler;
+  private final CountDownLatch handlerInitLatch;
 
-	private final CaptureActivity activity;
+  DecodeThread(CaptureActivity activity,
+               Collection<BarcodeFormat> decodeFormats,
+               Map<DecodeHintType,?> baseHints,
+               String characterSet,
+               ResultPointCallback resultPointCallback) {
 
-	private final Map<DecodeHintType, Object> hints;
+    this.activity = activity;
+    handlerInitLatch = new CountDownLatch(1);
 
-	private Handler handler;
+    hints = new EnumMap<>(DecodeHintType.class);
+    if (baseHints != null) {
+      hints.putAll(baseHints);
+    }
 
-	private final CountDownLatch handlerInitLatch;
+    // The prefs can't change while the thread is running, so pick them up once here.
+    if (decodeFormats == null || decodeFormats.isEmpty()) {
+      SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+      decodeFormats = EnumSet.noneOf(BarcodeFormat.class);
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_1D_PRODUCT, true)) {
+        decodeFormats.addAll(DecodeFormatManager.PRODUCT_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_1D_INDUSTRIAL, true)) {
+        decodeFormats.addAll(DecodeFormatManager.INDUSTRIAL_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_QR, true)) {
+        decodeFormats.addAll(DecodeFormatManager.QR_CODE_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_DATA_MATRIX, true)) {
+        decodeFormats.addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_AZTEC, false)) {
+        decodeFormats.addAll(DecodeFormatManager.AZTEC_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_PDF417, false)) {
+        decodeFormats.addAll(DecodeFormatManager.PDF417_FORMATS);
+      }
+    }
+    hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
 
-	DecodeThread(CaptureActivity activity,
-                 Collection<BarcodeFormat> decodeFormats,
-                 Map<DecodeHintType, ?> baseHints, String characterSet,
-                 ResultPointCallback resultPointCallback) {
+    if (characterSet != null) {
+      hints.put(DecodeHintType.CHARACTER_SET, characterSet);
+    }
+    hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK, resultPointCallback);
+  }
 
-		this.activity = activity;
-		handlerInitLatch = new CountDownLatch(1);
+  Handler getHandler() {
+    try {
+      handlerInitLatch.await();
+    } catch (InterruptedException ie) {
+      // continue?
+    }
+    return handler;
+  }
 
-		hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
-		if (baseHints != null) {
-			hints.putAll(baseHints);
-		}
-
-		// The prefs can't change while the thread is running, so pick them up
-		// once here.
-		if (decodeFormats == null || decodeFormats.isEmpty()) {
-			SharedPreferences prefs = PreferenceManager
-					.getDefaultSharedPreferences(activity);
-			decodeFormats = EnumSet.noneOf(BarcodeFormat.class);
-			if (prefs.getBoolean(Config.KEY_DECODE_1D, false)) {
-				decodeFormats.addAll(DecodeFormatManager.ONE_D_FORMATS);
-			}
-			if (prefs.getBoolean(Config.KEY_DECODE_QR, false)) {
-				decodeFormats.addAll(DecodeFormatManager.QR_CODE_FORMATS);
-			}
-			if (prefs.getBoolean(Config.KEY_DECODE_DATA_MATRIX,
-					false)) {
-				decodeFormats.addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);
-			}
-		}
-		hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
-
-		if (characterSet != null) {
-			hints.put(DecodeHintType.CHARACTER_SET, characterSet);
-		}
-		hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK,
-				resultPointCallback);
-		Log.i("DecodeThread", "Hints: " + hints);
-	}
-
-	Handler getHandler() {
-		try {
-			handlerInitLatch.await();
-		}
-		catch (InterruptedException ie) {
-			// continue?
-		}
-		return handler;
-	}
-
-	@Override
-	public void run() {
-		Looper.prepare();
-		handler = new DecodeHandler(activity, hints);
-		handlerInitLatch.countDown();
-		Looper.loop();
-	}
+  @Override
+  public void run() {
+    Looper.prepare();
+    handler = new DecodeHandler(activity, hints);
+    handlerInitLatch.countDown();
+    Looper.loop();
+  }
 
 }

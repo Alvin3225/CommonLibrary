@@ -104,7 +104,7 @@ public final class Detector {
 
       if (vertices[0] == null && vertices[3] == null) {
         if (!foundBarcodeInRow) {
-          // we didn't find any barcode so that's the end of searching 
+          // we didn't find any barcode so that's the end of searching
           break;
         }
         // we didn't find a barcode starting at the given column and row. Try again from the first column and slightly
@@ -127,7 +127,7 @@ public final class Detector {
       if (!multiple) {
         break;
       }
-      // if we didn't find a right row indicator column, then continue the search for the next barcode after the 
+      // if we didn't find a right row indicator column, then continue the search for the next barcode after the
       // start pattern of the barcode just found.
       if (vertices[2] != null) {
         column = (int) vertices[2].getX();
@@ -234,9 +234,7 @@ public final class Detector {
       result[3] = new ResultPoint(previousRowLoc[1], stopRow);
     }
     if (stopRow - startRow < BARCODE_MIN_HEIGHT) {
-      for (int i = 0; i < result.length; i++) {
-        result[i] = null;
-      }
+      Arrays.fill(result, null);
     }
     return result;
   }
@@ -248,7 +246,7 @@ public final class Detector {
    * @param width the number of pixels to search on this row
    * @param pattern pattern of counts of number of black and white pixels that are
    *                 being searched for as a pattern
-   * @param counters array of counters, as long as pattern, to re-use 
+   * @param counters array of counters, as long as pattern, to re-use
    * @return start/end horizontal offset of guard pattern, as an array of two ints.
    */
   private static int[] findGuardPattern(BitMatrix matrix,
@@ -262,17 +260,16 @@ public final class Detector {
     int patternStart = column;
     int pixelDrift = 0;
 
-    // if there are black pixels left of the current pixel shift to the left, but only for MAX_PIXEL_DRIFT pixels 
+    // if there are black pixels left of the current pixel shift to the left, but only for MAX_PIXEL_DRIFT pixels
     while (matrix.get(patternStart, row) && patternStart > 0 && pixelDrift++ < MAX_PIXEL_DRIFT) {
       patternStart--;
     }
     int x = patternStart;
     int counterPosition = 0;
     int patternLength = pattern.length;
-    boolean isWhite = whiteFirst;
-    for (; x < width; x++) {
+    for (boolean isWhite = whiteFirst; x < width; x++) {
       boolean pixel = matrix.get(x, row);
-      if (pixel ^ isWhite) {
+      if (pixel != isWhite) {
         counters[counterPosition]++;
       } else {
         if (counterPosition == patternLength - 1) {
@@ -280,9 +277,9 @@ public final class Detector {
             return new int[] {patternStart, x};
           }
           patternStart += counters[0] + counters[1];
-          System.arraycopy(counters, 2, counters, 0, patternLength - 2);
-          counters[patternLength - 2] = 0;
-          counters[patternLength - 1] = 0;
+          System.arraycopy(counters, 2, counters, 0, counterPosition - 1);
+          counters[counterPosition - 1] = 0;
+          counters[counterPosition] = 0;
           counterPosition--;
         } else {
           counterPosition++;
@@ -291,10 +288,9 @@ public final class Detector {
         isWhite = !isWhite;
       }
     }
-    if (counterPosition == patternLength - 1) {
-      if (patternMatchVariance(counters, pattern, MAX_INDIVIDUAL_VARIANCE) < MAX_AVG_VARIANCE) {
-        return new int[] {patternStart, x - 1};
-      }
+    if (counterPosition == patternLength - 1 &&
+        patternMatchVariance(counters, pattern, MAX_INDIVIDUAL_VARIANCE) < MAX_AVG_VARIANCE) {
+      return new int[] {patternStart, x - 1};
     }
     return null;
   }

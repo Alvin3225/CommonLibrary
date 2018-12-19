@@ -36,10 +36,12 @@ import java.util.Map;
  */
 public final class MultiFormatOneDReader extends OneDReader {
 
+  private static final OneDReader[] EMPTY_ONED_ARRAY = new OneDReader[0];
+
   private final OneDReader[] readers;
 
   public MultiFormatOneDReader(Map<DecodeHintType,?> hints) {
-    @SuppressWarnings("unchecked")    
+    @SuppressWarnings("unchecked")
     Collection<BarcodeFormat> possibleFormats = hints == null ? null :
         (Collection<BarcodeFormat>) hints.get(DecodeHintType.POSSIBLE_FORMATS);
     boolean useCode39CheckDigit = hints != null &&
@@ -84,7 +86,7 @@ public final class MultiFormatOneDReader extends OneDReader {
       readers.add(new RSS14Reader());
       readers.add(new RSSExpandedReader());
     }
-    this.readers = readers.toArray(new OneDReader[readers.size()]);
+    this.readers = readers.toArray(EMPTY_ONED_ARRAY);
   }
 
   @Override

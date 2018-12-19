@@ -53,7 +53,7 @@ public interface Writer {
                    BarcodeFormat format,
                    int width,
                    int height,
-                   Map<EncodeHintType,?> hints)
+                   Map<EncodeHintType, ?> hints)
       throws WriterException;
 
 }

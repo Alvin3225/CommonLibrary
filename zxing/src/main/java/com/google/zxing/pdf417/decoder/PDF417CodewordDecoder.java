@@ -25,7 +25,7 @@ import com.google.zxing.pdf417.PDF417Common;
  */
 final class PDF417CodewordDecoder {
 
-  private static final float[][] RATIOS_TABLE = 
+  private static final float[][] RATIOS_TABLE =
       new float[PDF417Common.SYMBOL_TABLE.length][PDF417Common.BARS_IN_MODULE];
 
   static {
@@ -63,7 +63,7 @@ final class PDF417CodewordDecoder {
     int sumPreviousBits = 0;
     for (int i = 0; i < PDF417Common.MODULES_IN_CODEWORD; i++) {
       float sampleIndex = 
-          bitCountSum / (2 * PDF417Common.MODULES_IN_CODEWORD) + 
+          bitCountSum / (2 * PDF417Common.MODULES_IN_CODEWORD) +
           (i * bitCountSum) / PDF417Common.MODULES_IN_CODEWORD;
       if (sumPreviousBits + moduleBitCount[bitCountIndex] <= sampleIndex) {
         sumPreviousBits += moduleBitCount[bitCountIndex];
@@ -92,8 +92,10 @@ final class PDF417CodewordDecoder {
   private static int getClosestDecodedValue(int[] moduleBitCount) {
     int bitCountSum = MathUtils.sum(moduleBitCount);
     float[] bitCountRatios = new float[PDF417Common.BARS_IN_MODULE];
-    for (int i = 0; i < bitCountRatios.length; i++) {
-      bitCountRatios[i] = moduleBitCount[i] / (float) bitCountSum;
+    if (bitCountSum > 1) {
+      for (int i = 0; i < bitCountRatios.length; i++) {
+        bitCountRatios[i] = moduleBitCount[i] / (float) bitCountSum;
+      }
     }
     float bestMatchError = Float.MAX_VALUE;
     int bestMatch = -1;

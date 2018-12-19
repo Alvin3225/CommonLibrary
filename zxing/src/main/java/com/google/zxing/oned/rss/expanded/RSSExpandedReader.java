@@ -145,15 +145,16 @@ public final class RSSExpandedReader extends AbstractRSSReader {
 
   // Not private for testing
   List<ExpandedPair> decodeRow2pairs(int rowNumber, BitArray row) throws NotFoundException {
-    try {
-      while (true) {
-        ExpandedPair nextPair = retrieveNextPair(row, this.pairs, rowNumber);
-        this.pairs.add(nextPair);
+    boolean done = false;
+    while (!done) {
+      try {
+        this.pairs.add(retrieveNextPair(row, this.pairs, rowNumber));
+      } catch (NotFoundException nfe) {
+        if (this.pairs.isEmpty()) {
+          throw nfe;
+        }
         // exit this loop when retrieveNextPair() fails and throws
-      }
-    } catch (NotFoundException nfe) {
-      if (this.pairs.isEmpty()) {
-        throw nfe;
+        done = true;
       }
     }
 
@@ -161,7 +162,7 @@ public final class RSSExpandedReader extends AbstractRSSReader {
     if (checkChecksum()) {
       return this.pairs;
     }
-    
+
     boolean tryStackedDecode = !this.rows.isEmpty();
     storeRow(rowNumber, false); // TODO: deal with reversed rows
     if (tryStackedDecode) {
@@ -176,7 +177,7 @@ public final class RSSExpandedReader extends AbstractRSSReader {
         return ps;
       }
     }
-    
+
     throw NotFoundException.getNotFoundInstance();
   }
 
@@ -227,8 +228,7 @@ public final class RSSExpandedReader extends AbstractRSSReader {
         return this.pairs;
       }
 
-      List<ExpandedRow> rs = new ArrayList<>();
-      rs.addAll(collectedRows);
+      List<ExpandedRow> rs = new ArrayList<>(collectedRows);
       rs.add(row);
       try {
         // Recursion: try to add more rows
@@ -241,7 +241,7 @@ public final class RSSExpandedReader extends AbstractRSSReader {
     throw NotFoundException.getNotFoundInstance();
   }
 
-  // Whether the pairs form a valid find pattern seqience,
+  // Whether the pairs form a valid find pattern sequence,
   // either complete or a prefix
   private static boolean isValidSequence(List<ExpandedPair> pairs) {
     for (int[] sequence : FINDER_PATTERN_SEQUENCES) {
@@ -297,7 +297,7 @@ public final class RSSExpandedReader extends AbstractRSSReader {
     removePartialRows(this.pairs, this.rows);
   }
 
-  // Remove all the rows that contains only specified pairs 
+  // Remove all the rows that contains only specified pairs
   private static void removePartialRows(List<ExpandedPair> pairs, List<ExpandedRow> rows) {
     for (Iterator<ExpandedRow> iterator = rows.iterator(); iterator.hasNext();) {
       ExpandedRow r = iterator.next();
@@ -441,11 +441,11 @@ public final class RSSExpandedReader extends AbstractRSSReader {
     // boolean mayBeLast = checkPairSequence(previousPairs, pattern);
 
     DataCharacter leftChar  = this.decodeDataCharacter(row, pattern, isOddPattern, true);
-    
+
     if (!previousPairs.isEmpty() && previousPairs.get(previousPairs.size() - 1).mustBeLast()) {
       throw NotFoundException.getNotFoundInstance();
     }
-    
+
     DataCharacter rightChar;
     try {
       rightChar = this.decodeDataCharacter(row, pattern, isOddPattern, false);
@@ -491,7 +491,7 @@ public final class RSSExpandedReader extends AbstractRSSReader {
     int counterPosition = 0;
     int patternStart = rowOffset;
     for (int x = rowOffset; x < width; x++) {
-      if (row.get(x) ^ isWhite) {
+      if (row.get(x) != isWhite) {
         counters[counterPosition]++;
       } else {
         if (counterPosition == 3) {
@@ -582,14 +582,9 @@ public final class RSSExpandedReader extends AbstractRSSReader {
                                     boolean isOddPattern,
                                     boolean leftChar) throws NotFoundException {
     int[] counters = this.getDataCharacterCounters();
-    counters[0] = 0;
-    counters[1] = 0;
-    counters[2] = 0;
-    counters[3] = 0;
-    counters[4] = 0;
-    counters[5] = 0;
-    counters[6] = 0;
-    counters[7] = 0;
+    for (int x = 0; x < counters.length; x++) {
+      counters[x] = 0;
+    }
 
     if (leftChar) {
       recordPatternInReverse(row, pattern.getStartEnd()[0], counters);

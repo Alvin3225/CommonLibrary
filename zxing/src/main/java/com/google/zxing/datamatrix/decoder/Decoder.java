@@ -48,16 +48,7 @@ public final class Decoder {
    * @throws ChecksumException if error correction fails
    */
   public DecoderResult decode(boolean[][] image) throws FormatException, ChecksumException {
-    int dimension = image.length;
-    BitMatrix bits = new BitMatrix(dimension);
-    for (int i = 0; i < dimension; i++) {
-      for (int j = 0; j < dimension; j++) {
-        if (image[i][j]) {
-          bits.set(j, i);
-        }
-      }
-    }
-    return decode(bits);
+    return decode(BitMatrix.parse(image));
   }
 
   /**

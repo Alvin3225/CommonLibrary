@@ -16,7 +16,6 @@
 
 package com.google.zxing;
 
-import com.common.zxing.CaptureActivity;
 import com.google.zxing.aztec.AztecReader;
 import com.google.zxing.datamatrix.DataMatrixReader;
 import com.google.zxing.maxicode.MaxiCodeReader;
@@ -38,9 +37,10 @@ import java.util.Map;
  */
 public final class MultiFormatReader implements Reader {
 
+  private static final Reader[] EMPTY_READER_ARRAY = new Reader[0];
+
   private Map<DecodeHintType,?> hints;
   private Reader[] readers;
-  private CaptureActivity activity;
 
   /**
    * This version of decode honors the intent of Reader.decode(BinaryBitmap) in that it
@@ -120,7 +120,7 @@ public final class MultiFormatReader implements Reader {
         readers.add(new MultiFormatOneDReader(hints));
       }
       if (formats.contains(BarcodeFormat.QR_CODE)) {
-        readers.add(new QRCodeReader(activity));
+        readers.add(new QRCodeReader());
       }
       if (formats.contains(BarcodeFormat.DATA_MATRIX)) {
         readers.add(new DataMatrixReader());
@@ -144,7 +144,7 @@ public final class MultiFormatReader implements Reader {
         readers.add(new MultiFormatOneDReader(hints));
       }
 
-      readers.add(new QRCodeReader(activity));
+      readers.add(new QRCodeReader());
       readers.add(new DataMatrixReader());
       readers.add(new AztecReader());
       readers.add(new PDF417Reader());
@@ -154,7 +154,7 @@ public final class MultiFormatReader implements Reader {
         readers.add(new MultiFormatOneDReader(hints));
       }
     }
-    this.readers = readers.toArray(new Reader[readers.size()]);
+    this.readers = readers.toArray(EMPTY_READER_ARRAY);
   }
 
   @Override
@@ -179,7 +179,4 @@ public final class MultiFormatReader implements Reader {
     throw NotFoundException.getNotFoundInstance();
   }
 
-  public void setActivity(CaptureActivity activity) {
-    this.activity = activity;
-  }
 }
