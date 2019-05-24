@@ -186,6 +186,7 @@ final class CameraConfigurationManager {
 
     parameters.setPreviewSize(bestPreviewSize.x, bestPreviewSize.y);
 
+    theCamera.setDisplayOrientation(90);//add 这句代码作用是旋转镜头90度，使相机预览方向正确显示
     theCamera.setParameters(parameters);
 
     theCamera.setDisplayOrientation(cwRotationFromDisplayToCamera);

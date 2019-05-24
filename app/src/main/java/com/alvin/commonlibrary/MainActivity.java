@@ -27,7 +27,7 @@ public class MainActivity extends Activity {
         if(EasyPermissions.hasPermissions(this,Manifest.permission.CAMERA)){
             Intent intent = new Intent();
             intent.setClass(this, CaptureActivity.class);
-            intent.putExtra("autoEnlarged",true);
+            intent.putExtra("autoEnlarged",false);
             startActivityForResult(intent,0);
         }else{
             EasyPermissions.requestPermissions(new PermissionRequest.Builder(this,1,Manifest.permission.CAMERA).build());

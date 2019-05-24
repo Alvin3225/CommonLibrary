@@ -320,13 +320,26 @@ public final class CameraManager {
    * @return A PlanarYUVLuminanceSource instance.
    */
   public PlanarYUVLuminanceSource buildLuminanceSource(byte[] data, int width, int height) {
-    Rect rect = getFramingRectInPreview();
+    /*Rect rect = getFramingRectInPreview();
     if (rect == null) {
       return null;
     }
     // Go ahead and assume it's YUV rather than die.
     return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
-                                        rect.width(), rect.height(), false);
+                                        rect.width(), rect.height(), false);*/
+    // 直接返回整幅图像的数据，而不计算聚焦框大小。
+
+    byte[] rotatedData = new byte[data.length];
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++)
+        rotatedData[x * height + height - y - 1] = data[x + y * width];
+    }
+    int tmp = width;
+    width = height;
+    height = tmp;
+    data = rotatedData;
+
+    return new PlanarYUVLuminanceSource(data, width, height, 0, 0, width, height, false);
   }
 
 }
