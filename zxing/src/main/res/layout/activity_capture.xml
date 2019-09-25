@@ -18,6 +18,55 @@
         android:background="@color/transparent" />
 
     <LinearLayout
+        android:id="@+id/ll_light"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:gravity="bottom|center_horizontal"
+        android:visibility="invisible"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/capture_flashlight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/icon_sweep_flashlight" />
+
+        <TextView
+            android:id="@+id/tv_flashlight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/flashlight_on"
+            android:textColor="@android:color/white"
+            android:textSize="14dip" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:visibility="invisible"
+        android:orientation="vertical">
+
+        <ProgressBar
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:indeterminateDrawable="@drawable/progress_round"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="已扫描，正在处理"
+            android:textColor="@android:color/white"
+            android:textSize="14dip" />
+    </LinearLayout>
+
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="top"
@@ -40,18 +89,12 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <TextView
+                <ImageView
                     android:id="@+id/top_leftButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dip"
-                    android:layout_marginRight="30dp"
-                    android:clickable="false"
-                    android:duplicateParentState="true"
-                    android:focusable="false"
-                    android:text="@string/cancel_str"
-                    android:textColor="@color/WHITE"
-                    android:textSize="16dp" />
+                    android:background="@drawable/btn_nav_back_click"/>
             </LinearLayout>
 
             <TextView
@@ -82,20 +125,27 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/capture_flashlight"
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                android:background="@drawable/scan_flashlight_normal" />
-
-            <TextView
-                android:id="@+id/tv_flashlight"
+            <LinearLayout
+                android:id="@+id/ll_opt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/flashlight_on"
-                android:textColor="@android:color/white"
-                android:textSize="14dip" />
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageView
+                    android:id="@+id/btn_bottom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:src="@color/transparent"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:text="@string/input_invite_code"
+                    android:textColor="@android:color/white"
+                    android:textSize="14dip" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

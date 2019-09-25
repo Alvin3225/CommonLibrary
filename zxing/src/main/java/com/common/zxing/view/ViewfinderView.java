@@ -56,7 +56,7 @@ public final class ViewfinderView extends View {
 	/**
 	 * 四个绿色边角对应的宽度
 	 */
-	private static final int CORNER_WIDTH = 10;
+	private static final int CORNER_WIDTH = 4;
 	/**
 	 * 扫描框中的中间线的宽度
 	 */
@@ -79,16 +79,16 @@ public final class ViewfinderView extends View {
 	/**
 	 * 字体大小
 	 */
-	private static final int TEXT_SIZE = 16;
+	private static final int TEXT_SIZE = 14;
 	/**
 	 * 字体距离扫描框下面的距离
 	 */
-	private static final int TEXT_PADDING_TOP = 40;
+	private static final int TEXT_PADDING_TOP = 20;
 
 	/**
 	 * 画笔对象的引用
 	 */
-	private Paint paint;
+	private Paint paint;//
 
 	/**
 	 * 中间滑动线的最顶端位置
@@ -166,9 +166,9 @@ public final class ViewfinderView extends View {
 		// 画出扫描框外面的阴影部分，共四个部分，扫描框的上面到屏幕上面，扫描框的下面到屏幕下面
 		// 扫描框的左边面到屏幕左边，扫描框的右边到屏幕右边
 		canvas.drawRect(0, 0, width, frame.top, paint);
-		canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-		canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
-		canvas.drawRect(0, frame.bottom + 1, width, height, paint);
+		canvas.drawRect(0, frame.top, frame.left, frame.bottom, paint);
+		canvas.drawRect(frame.right, frame.top, width, frame.bottom, paint);
+		canvas.drawRect(0, frame.bottom, width, height, paint);
 
 		if (resultBitmap != null) {
 			// Draw the opaque result bitmap over the scanning rectangle
@@ -178,31 +178,35 @@ public final class ViewfinderView extends View {
 
 			// Draw a two pixel solid black border inside the framing rect
 			paint.setColor(0xffffffff);
-			canvas.drawRect(frame.left, frame.top, frame.right + 1, frame.top + 2, paint);
-			canvas.drawRect(frame.left, frame.top + 2, frame.left + 2, frame.bottom - 1, paint);
-			canvas.drawRect(frame.right - 1, frame.top, frame.right + 1, frame.bottom - 1, paint);
-			canvas.drawRect(frame.left, frame.bottom - 1, frame.right + 1, frame.bottom + 1, paint);
+			//上横
+			canvas.drawRect(frame.left, frame.top, frame.right, frame.top + 2, paint);
+			//左竖
+			canvas.drawRect(frame.left, frame.top, frame.left + 2, frame.bottom, paint);
+			//右竖
+			canvas.drawRect(frame.right - 2, frame.top, frame.right, frame.bottom, paint);
+			//下横
+			canvas.drawRect(frame.left, frame.bottom - 2, frame.right, frame.bottom, paint);
 
 			// 这里画取景框四个角落的夹角
-			paint.setColor(0xff0ec3ff);
+			paint.setColor(0xffff174b);
 			paint.setAntiAlias(true);
-			canvas.drawRect(frame.left - CORNER_WIDTH + 2, frame.top - CORNER_WIDTH + 2, frame.left + ScreenRate
-					- CORNER_WIDTH + 2, frame.top + 2, paint);
-			canvas.drawRect(frame.left - CORNER_WIDTH + 2, frame.top - CORNER_WIDTH + 2, frame.left + 2, frame.top
-					+ ScreenRate - CORNER_WIDTH + 2, paint);
-			canvas.drawRect(frame.right - ScreenRate + CORNER_WIDTH - 2, frame.top - CORNER_WIDTH + 2, frame.right
-					+ CORNER_WIDTH - 2, frame.top + 2, paint);
-			canvas.drawRect(frame.right - 2, frame.top - CORNER_WIDTH + 2, frame.right + CORNER_WIDTH - 2, frame.top
-					+ ScreenRate - CORNER_WIDTH + 2, paint);
+			//左上横
+			canvas.drawRect(frame.left, frame.top, frame.left + ScreenRate + CORNER_WIDTH, frame.top + CORNER_WIDTH, paint);
+			//左上竖
+			canvas.drawRect(frame.left, frame.top, frame.left + CORNER_WIDTH, frame.top + ScreenRate + CORNER_WIDTH, paint);
+			//右上横
+			canvas.drawRect(frame.right - ScreenRate - CORNER_WIDTH, frame.top, frame.right, frame.top + CORNER_WIDTH, paint);
+			//右上竖
+			canvas.drawRect(frame.right - CORNER_WIDTH, frame.top, frame.right, frame.top + ScreenRate + CORNER_WIDTH, paint);
 
-			canvas.drawRect(frame.left - CORNER_WIDTH + 2, frame.bottom - 2,
-					frame.left + ScreenRate - CORNER_WIDTH + 2, frame.bottom + CORNER_WIDTH - 2, paint);
-			canvas.drawRect(frame.left - CORNER_WIDTH + 2, frame.bottom - ScreenRate + CORNER_WIDTH - 2,
-					frame.left + 2, frame.bottom + CORNER_WIDTH - 2, paint);
-			canvas.drawRect(frame.right - ScreenRate + CORNER_WIDTH - 2, frame.bottom - 2, frame.right + CORNER_WIDTH
-					- 2, frame.bottom + CORNER_WIDTH - 2, paint);
-			canvas.drawRect(frame.right - 2, frame.bottom - ScreenRate + CORNER_WIDTH - 2, frame.right + CORNER_WIDTH
-					- 2, frame.bottom + CORNER_WIDTH - 2, paint);
+			//左下横
+			canvas.drawRect(frame.left, frame.bottom - CORNER_WIDTH, frame.left + ScreenRate + CORNER_WIDTH, frame.bottom, paint);
+			//左下竖
+			canvas.drawRect(frame.left, frame.bottom - ScreenRate - CORNER_WIDTH, frame.left + CORNER_WIDTH, frame.bottom, paint);
+			//右下横
+			canvas.drawRect(frame.right - ScreenRate - CORNER_WIDTH, frame.bottom - CORNER_WIDTH, frame.right, frame.bottom, paint);
+			//右下竖
+			canvas.drawRect(frame.right - CORNER_WIDTH, frame.bottom - ScreenRate - CORNER_WIDTH , frame.right, frame.bottom, paint);
 
 			// 绘制中间的线,每次刷新界面，中间的线往下移动SPEEN_DISTANCE
 			slideTop += SPEEN_DISTANCE;
@@ -249,9 +253,7 @@ public final class ViewfinderView extends View {
 			paint.setColor(Color.WHITE);
 			paint.setTextSize(TEXT_SIZE * density);
 			paint.setTextAlign(Align.CENTER);
-			canvas.drawText(getResources().getString(R.string.bottom_hint), width / 2, frame.bottom + (float)TEXT_PADDING_TOP *density, paint);
-			canvas.drawText(getResources().getString(R.string.bottom_hint2), width / 2, (float) (frame.bottom + (float)TEXT_PADDING_TOP *density*1.5), paint);
-
+			canvas.drawText(getResources().getString(R.string.top_hint), width / 2, frame.top - (float)TEXT_PADDING_TOP *density, paint);
 		}
 	}
 

@@ -12,5 +12,6 @@
     <item name="quit" type="id" />
     <item name="restart_preview" type="id" />
     <item name="return_scan_result" type="id" />
+    <item name="show_flash_light" type="id" />
 
 </resources>

@@ -1,12 +1,14 @@
 <resources>
     <string name="app_name">zxing</string>
     <string name="sweep">扫一扫</string>
-    <string name="flashlight_on">开启闪光灯</string>
-    <string name="flashlight_off">关闭闪光灯</string>
+    <string name="flashlight_on">轻触照亮</string>
+    <string name="flashlight_off">轻触关闭</string>
+    <string name="top_hint">请直接扫描推荐好友的专属二维码</string>
     <string name="bottom_hint">将取景框对准条形码位置,</string>
     <string name="bottom_hint2">即可自动扫描。</string>
     <string name="cancel_str">取消</string>
     <string name="sure_str">确定</string>
+    <string name="input_invite_code">去填好友邀请码</string>
 
     <string name="app_picker_name">应用</string>
     <string name="bookmark_picker_name">书签</string>

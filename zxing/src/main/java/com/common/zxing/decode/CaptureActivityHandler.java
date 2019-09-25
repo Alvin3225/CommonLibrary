@@ -90,7 +90,7 @@ public final class CaptureActivityHandler extends Handler {
 //          if (compressedBitmap != null) {
 //            barcode = BitmapFactory.decodeByteArray(compressedBitmap, 0, compressedBitmap.length, null);
 //            // Mutable copy:
-//            barcode = barcode.copy(Bitmap.Config.ARGB_8888, true);
+//            barcode = barcode.copy(Bitmap.Config.RGB_565, true);
 //          }
 //          scaleFactor = bundle.getFloat(DecodeThread.BARCODE_SCALED_FACTOR);
 //        }
@@ -132,6 +132,13 @@ public final class CaptureActivityHandler extends Handler {
         Log.w(TAG, "Can't find anything to handle VIEW of URI " + url);
       }
 
+    }else if(message.what==R.id.show_flash_light){
+      int obj = (int) message.obj;
+      if(obj==1){
+        activity.showFlashLight(true);
+      }else{
+        activity.showFlashLight(false);
+      }
     }
   }
 

@@ -18,11 +18,10 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.common.zxing.camera.CameraManager;
 import com.common.zxing.common.BitmapUtils;
@@ -48,11 +47,12 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
     private static final int PARSE_BARCODE_FAIL = 300;
     private static final int PARSE_BARCODE_SUC = 200;
 
-    private LinearLayout ll_bottom;
-    private TextView tv_flashlight;
-    private Button capture_flashlight;
-    private RelativeLayout ll_top;
-    private LinearLayout top_leftLy;
+    protected LinearLayout ll_bottom,ll_opt,ll_light;
+    protected TextView tv_flashlight;
+    protected ImageView capture_flashlight;
+    protected ImageView btn_bottom;
+    protected RelativeLayout ll_top;
+    protected LinearLayout top_leftLy;
     /**
      * 是否有预览
      */
@@ -124,8 +124,11 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
     SurfaceView surfaceView;
 
     private boolean autoEnlarged = false;//是否具有自动放大功能(功能仅仅限扫描的是二维码，条形码不放大)
+    protected boolean hasCallBackOption;//是否有回调操作
+    protected LinearLayout ll_progress;
+    protected boolean requestBoolean;
 
-    static class MyHandler extends Handler {
+    class MyHandler extends Handler {
 
         private WeakReference<Activity> activityReference;
 
@@ -138,14 +141,14 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
 
             switch (msg.what) {
                 case PARSE_BARCODE_SUC: // 解析图片成功
-                    Toast.makeText(activityReference.get(),
-                            "解析成功，结果为：" + msg.obj, Toast.LENGTH_SHORT).show();
+                    String result = msg.obj.toString();
+                    if(hasCallBackOption && !TextUtils.isEmpty(result)){
+                        onDecodeResultCallBackOption(result);
+                    }
                     break;
 
                 case PARSE_BARCODE_FAIL:// 解析图片失败
-
-                    Toast.makeText(activityReference.get(), "解析图片失败",
-                            Toast.LENGTH_SHORT).show();
+                    onDecodeResultCallBackOption("");
                     break;
 
                 default:
@@ -174,17 +177,21 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
 
 //		// 监听图片识别按钮
 //		findViewById(R.id.capture_scan_photo).setOnClickListener(this);
-        surfaceView = (SurfaceView) findViewById(R.id.capture_preview_view); // 预览
+        surfaceView = findViewById(R.id.capture_preview_view); // 预览
 
-        capture_flashlight = (Button) findViewById(R.id.capture_flashlight);
-        ll_bottom = (LinearLayout) findViewById(R.id.ll_bottom);
-        tv_flashlight = (TextView) findViewById(R.id.tv_flashlight);
-        ll_top = (RelativeLayout) findViewById(R.id.ll_top);
-        top_leftLy = (LinearLayout) findViewById(R.id.top_leftLy);
+        capture_flashlight = findViewById(R.id.capture_flashlight);
+        btn_bottom = findViewById(R.id.btn_bottom);
+        ll_light = findViewById(R.id.ll_light);
+        ll_bottom = findViewById(R.id.ll_bottom);
+        ll_opt = findViewById(R.id.ll_opt);
+        tv_flashlight = findViewById(R.id.tv_flashlight);
+        ll_top = findViewById(R.id.ll_top);
+        top_leftLy = findViewById(R.id.top_leftLy);
         ll_bottom.getBackground().setAlpha(130);
-        capture_flashlight.setOnClickListener(this);
+        ll_light.setOnClickListener(this);
         top_leftLy.setOnClickListener(this);
         ll_top.getBackground().setAlpha(130);
+        ll_progress = findViewById(R.id.ll_progress);
     }
 
     @Override
@@ -398,13 +405,25 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
         //改到playSound(int type)方法中调用
         playSound();
         String raw = rawResult.getText();
-        if (!TextUtils.isEmpty(raw)) {
-            Intent intent = new Intent();
-            intent.putExtra("result", raw);
-            setResult(RESULT_OK, intent);
-            finish();
+        if(hasCallBackOption && !TextUtils.isEmpty(raw)){
+            onDecodeResultCallBackOption(raw);
+        }else{
+            if (!TextUtils.isEmpty(raw)) {
+                Intent intent = new Intent();
+                intent.putExtra("result", raw);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
         }
         isfisrt = true;
+    }
+
+    /**
+     * 解析出二维码后如果需要更多操作，重写该方法
+     * @param result
+     */
+    public void onDecodeResultCallBackOption(String result){
+
     }
 
     public void restartPreviewAfterDelay(long delayMS) {
@@ -500,18 +519,18 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
     @Override
     public void onClick(View v) {
         int i = v.getId();
-        if (i == R.id.capture_flashlight) {
+        if (i == R.id.ll_light) {
             if (isFlashlightOpen) {
                 cameraManager.setTorch(false); // 关闭闪光灯
                 isFlashlightOpen = false;
-                tv_flashlight.setText(R.string.flashlight_off);
-                capture_flashlight.setBackgroundResource(R.drawable.scan_flashlight_normal);
+                tv_flashlight.setText(R.string.flashlight_on);
+                capture_flashlight.setImageResource(R.drawable.icon_sweep_flashlight);
 
             } else {
                 cameraManager.setTorch(true); // 打开闪光灯
                 isFlashlightOpen = true;
-                tv_flashlight.setText(R.string.flashlight_on);
-                capture_flashlight.setBackgroundResource(R.drawable.scan_flashlight_pressed);
+                tv_flashlight.setText(R.string.flashlight_off);
+                capture_flashlight.setImageResource(R.drawable.icon_sweep_flashlight_open);
             }
 
         } else if (i == R.id.top_leftLy) {
@@ -525,5 +544,21 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback,
 
     public boolean isAutoEnlarged() {
         return autoEnlarged;
+    }
+
+    public void showFlashLight(boolean show){
+        if(requestBoolean){
+            ll_light.setVisibility(View.INVISIBLE);
+        }else{
+            if(isFlashlightOpen){//如果已经打开，则按钮始终显示状态
+                ll_light.setVisibility(View.VISIBLE);
+            }else{
+                if(show){
+                    ll_light.setVisibility(View.VISIBLE);
+                }else{
+                    ll_light.setVisibility(View.INVISIBLE);
+                }
+            }
+        }
     }
 }

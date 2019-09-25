@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.common.zxing.CaptureActivity;
+import com.common.zxing.common.DensityUtils;
 import com.google.zxing.PlanarYUVLuminanceSource;
 
 import java.io.IOException;
@@ -226,7 +227,7 @@ public final class CameraManager {
       int height = width;
 
       int leftOffset = (screenResolution.x - width) / 2;
-      int topOffset = (screenResolution.y - height) / 2;
+      int topOffset = (screenResolution.y - height) / 2 -DensityUtils.convertDpToPixel(50f,context);
       framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
       Log.d(TAG, "Calculated framing rect: " + framingRect);
     }
@@ -234,7 +235,7 @@ public final class CameraManager {
   }
   
   private static int findDesiredDimensionInRange(int resolution, int hardMin, int hardMax) {
-    int dim = 5 * resolution / 8; // Target 5/8 of each dimension
+    int dim = 5 * resolution / 8; // Target 5/6 of each dimension
     if (dim < hardMin) {
       return hardMin;
     }
@@ -328,17 +329,6 @@ public final class CameraManager {
     return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
                                         rect.width(), rect.height(), false);*/
     // 直接返回整幅图像的数据，而不计算聚焦框大小。
-
-    byte[] rotatedData = new byte[data.length];
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < width; x++)
-        rotatedData[x * height + height - y - 1] = data[x + y * width];
-    }
-    int tmp = width;
-    width = height;
-    height = tmp;
-    data = rotatedData;
-
     return new PlanarYUVLuminanceSource(data, width, height, 0, 0, width, height, false);
   }
 

@@ -107,14 +107,14 @@ final class AutoFocusManager implements Camera.AutoFocusCallback {
     stopped = true;
     if (useAutoFocus) {
       cancelOutstandingTask();
-      // Doesn't hurt to call this even if not focusing
-      try {
-        camera.cancelAutoFocus();
-      } catch (RuntimeException re) {
-        // Have heard RuntimeException reported in Android 4.0.x+; continue?
-        Log.w(TAG, "Unexpected exception while cancelling focusing", re);
-      }
     }
+    // Doesn't hurt to call this even if not focusing
+    /*try {
+      camera.cancelAutoFocus();
+    } catch (RuntimeException re) {
+      // Have heard RuntimeException reported in Android 4.0.x+; continue?
+      Log.w(TAG, "Unexpected exception while cancelling focusing", re);
+    }*/
   }
 
   private final class AutoFocusTask extends AsyncTask<Object,Object,Object> {
