@@ -188,7 +188,7 @@ public final class ViewfinderView extends View {
 			canvas.drawRect(frame.left, frame.bottom - 2, frame.right, frame.bottom, paint);
 
 			// 这里画取景框四个角落的夹角
-			paint.setColor(0xffff174b);
+			paint.setColor(0xFF3ABCFF);
 			paint.setAntiAlias(true);
 			//左上横
 			canvas.drawRect(frame.left, frame.top, frame.left + ScreenRate + CORNER_WIDTH, frame.top + CORNER_WIDTH, paint);
@@ -253,7 +253,7 @@ public final class ViewfinderView extends View {
 			paint.setColor(Color.WHITE);
 			paint.setTextSize(TEXT_SIZE * density);
 			paint.setTextAlign(Align.CENTER);
-			canvas.drawText(getResources().getString(R.string.top_hint), width / 2, frame.top - (float)TEXT_PADDING_TOP *density, paint);
+			canvas.drawText(getResources().getString(R.string.top_hint), width / 2, frame.bottom + (float)TEXT_PADDING_TOP *density, paint);
 		}
 	}
 

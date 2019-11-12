@@ -3,7 +3,7 @@
     <string name="sweep">扫一扫</string>
     <string name="flashlight_on">轻触照亮</string>
     <string name="flashlight_off">轻触关闭</string>
-    <string name="top_hint">请直接扫描推荐好友的专属二维码</string>
+    <string name="top_hint">将二维码放入框内即可扫描</string>
     <string name="bottom_hint">将取景框对准条形码位置,</string>
     <string name="bottom_hint2">即可自动扫描。</string>
     <string name="cancel_str">取消</string>

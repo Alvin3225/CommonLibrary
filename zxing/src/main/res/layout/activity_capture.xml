@@ -123,6 +123,7 @@
             android:layout_height="120dip"
             android:background="@android:color/black"
             android:gravity="center"
+            android:visibility="gone"
             android:orientation="vertical">
 
             <LinearLayout
